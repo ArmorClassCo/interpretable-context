@@ -23,12 +23,12 @@ only what you can answer and **researches the technical choices itself** (or, fo
 
 ### From GitHub
 ```
-/plugin marketplace add <owner>/<repo>
+/plugin marketplace add ArmorClassCo/interpretable-context
 /plugin install interpretable-context@icm
 ```
 or with the CLI:
 ```
-claude plugin marketplace add https://github.com/<owner>/<repo>.git
+claude plugin marketplace add https://github.com/ArmorClassCo/interpretable-context.git
 claude plugin install interpretable-context@icm
 ```
 
