@@ -1,2 +1,7 @@
 .DS_Store
 *.log
+
+# Python (the validator + tests are stdlib; never commit bytecode)
+__pycache__/
+*.pyc
+.pytest_cache/

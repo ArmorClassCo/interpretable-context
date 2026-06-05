@@ -1,0 +1,48 @@
+{
+  "created": "2026-06-05",
+  "paths": [
+    {
+      "path": "Dockerfile",
+      "sha256": "2dc10519f7be9ab5cac1573ad3cb0c7bb695da82d5f1c93dd6df6649479a62ef",
+      "size": 118
+    },
+    {
+      "path": "docs/architecture/data-model.md",
+      "sha256": "db3700db00d596a1d7a0b15c87a654065bd104c0986d45ffbb305501d6461cc2",
+      "size": 133
+    },
+    {
+      "path": "next.config.js",
+      "sha256": "782c49f870653b4ca4a7813e1ddab54762ce9249ec55bca62a72fcc12c55a56a",
+      "size": 116
+    },
+    {
+      "path": "package.json",
+      "sha256": "34c4c045736f897600f27e328d312ea0a431b8545d1507e90b0369c999ea563f",
+      "size": 307
+    },
+    {
+      "path": "src/app/page.tsx",
+      "sha256": "6336bf0cd5d95f8df26dae6a704bcc2c8c11d66faf3e8686cf7999605c610a90",
+      "size": 65
+    },
+    {
+      "path": "src/lib/db.ts",
+      "sha256": "e0214b1d208dabe062b1554f1ea20ea55e1d7355dab6a68ba1b3deb6c7d93669",
+      "size": 110
+    }
+  ],
+  "tool_paths": [
+    "CLAUDE.md",
+    "CONTEXT.md",
+    "src/CONTEXT.md",
+    "docs/CONTEXT.md",
+    "ops/CONTEXT.md",
+    "planning/CONTEXT.md",
+    ".icm/manifest.md",
+    ".icm/README.md",
+    ".icm/LEARNINGS-INBOX.md",
+    ".icm/baseline.json",
+    "PROJECT-BRIEF.md"
+  ]
+}

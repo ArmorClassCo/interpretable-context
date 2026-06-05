@@ -88,8 +88,10 @@ it recurs. Let the user approve all, approve some, or reject. Don't apply anythi
 ### 6. Apply the approved learnings
 Edit the destination files to insert the approved learnings in the right section, in the format §9
 specifies (e.g. append a bullet under `src/CONTEXT.md` "Patterns We Follow"; add a row to the
-`CLAUDE.md` "Commands" table; create a dated ADR under `planning/decisions/`). Append a short audit
-note to `.icm/LEARNINGS-INBOX.md` recording what was applied and when. Discard the rejected ones.
+`CLAUDE.md` "Commands" table; create a dated ADR under `planning/decisions/`). A `thing-to-avoid`
+goes under `CLAUDE.md` → Avoid → **Soft defaults** (never the Hard block — that's user-authored),
+carrying today's date + `provenance: learned`, exactly as §9's insert format shows. Append a short
+audit note to `.icm/LEARNINGS-INBOX.md` recording what was applied and when. Discard the rejected ones.
 
 ## Example
 

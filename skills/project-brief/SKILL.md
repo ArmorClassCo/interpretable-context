@@ -92,6 +92,14 @@ present trade-off matrices or three competing options to a non-technical user �
 the burden back onto them, which is the whole thing we're avoiding. (If the user is clearly
 technical and wants options, it's fine to offer them.)
 
+### 5.5. Coverage re-read pass — catch what they volunteered
+Before validating, **re-read the whole conversation** for anything the user mentioned that no
+question captured — an integration said in passing ("oh, it has to work offline" / "we already pay
+for Stripe"), an excluded feature, a budget or compliance limit, a brand/tone note. For each, either
+map it to an existing field, add it to **Things to Avoid** (as HARD if it's a real limit), or record
+it in the manifest. This pass is cheap and high-yield: non-technical builders drop requirements
+casually, and a brief that loses them produces the wrong scaffold.
+
 ### 6. Validation pass — the zero-missing-context guarantee
 Before writing, check that **every `required: yes` field is filled.** If any is empty, go back and
 ask or research it. This check is what lets `project-scaffold` build the whole structure without
@@ -121,24 +129,31 @@ Use this structure:
 
 ## Structure Manifest
 <!-- one entry per field in the type's question set, mapping 1:1 to the structure
-     project-scaffold will build. Include every answered question by its id. -->
-- {id}: {answer}
+     project-scaffold will build. Include every answered question by its id, and tag each with its
+     provenance: [user] | [user-confirmed-default] | [assumed-default]. -->
+- {id}: {answer}  [{provenance}]
 - ...
 
 ## Things to Avoid
-- {constraints and things_to_avoid, as bullets}
+### Hard (never cross)
+- {real user guardrails: excluded features, areas/data to leave alone, budget/compliance limits}
+### Soft (revisitable defaults)
+- {researched/assumed defaults the user didn't hard-require}
 
 ## Reference Material to Seed (L3)
 - {anything the user gave to start from; "none" if nothing}
 
 ## Provenance
-- User-provided: {list of ids}
-- Researched: {list of ids, with the one-line rationale for each}
+- User-provided: {ids}
+- User-confirmed defaults: {ids researched and explicitly confirmed}
+- Assumed defaults: {ids researched but only weakly confirmed — a future session may revisit}
 ```
 
 The **Structure Manifest** is the important part: it's the field-by-field answer set that
-`project-scaffold` maps directly onto folders and templates. Provenance is there so a human can see
-later which choices were theirs versus researched defaults.
+`project-scaffold` maps directly onto folders and templates. The **per-field provenance** tag lets the
+scaffold (and future sessions) tell a hard user choice from a soft assumed default — `assumed-default`
+choices render as revisitable Soft avoids, not as fixed constraints. Splitting **Things to Avoid** into
+HARD vs SOFT is the same idea (ARA §7.4): structure should guide a capable agent, not box it in.
 
 ### 9. Offer the next step
 Tell the user the brief is written, and offer: *"Want me to build the folder structure now?"* If

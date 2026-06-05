@@ -17,7 +17,10 @@ the `repo-analyzer` agent, and the commands are generic machinery — you rarely
 | `project-scaffold` | plugin `skills/project-scaffold/` | Builds the folder/routing structure (greenfield or brownfield overlay) |
 | `session-learnings` | plugin `skills/session-learnings/` | Captures recurring learnings into a project's files |
 | `repo-analyzer` (agent) | plugin `agents/` | Read-only repo inventory used by `adopt-project` |
-| Commands | plugin `commands/` | Thin entry points: `/icm`, `/new-project`, `/adopt-project`, `/scaffold`, `/learnings` |
+| `icm-validate` | plugin `skills/icm-validate/` + `commands/icm-validate.md` | Manual QA: runs the validator on an ICM project |
+| Validator | plugin `icm_validator/` (Python 3 stdlib) + `scripts/icm` shim + `scripts/icm_baseline.py` | `icm lint` (registry) + `icm validate project` (scaffold/overlay) — registry-driven, mechanical |
+| Tests / CI | plugin `tests/` (stdlib `unittest`) + `.github/workflows/validate.yml` | Golden fixtures + mutation matrix for both greenfield and brownfield |
+| Commands | plugin `commands/` | Thin entry points: `/icm`, `/new-project`, `/adopt-project`, `/scaffold`, `/learnings`, `/icm-validate` |
 
 ## The golden rule
 
@@ -79,3 +82,11 @@ for yourself, drop the file in `~/.claude/icm/registry/`.)
   actually use the new field (its `maps_to`).
 - Changed a **skill's process**? → if it changed what it reads from the registry, update the
   FORMAT SPEC in `_index.md` and every type file, or the skill will read fields that don't exist.
+- Bumped a type's **`version`** or changed its **§4/§6/§7**? → regenerate the golden fixtures under
+  `tests/fixtures/{greenfield,brownfield}/` and bump the `registry_version` in their `.icm/manifest.md`.
+  A drift-guard test asserts the fixture's `registry_version` equals the live type `version`, so it
+  fails loudly until you do — turning silent fixture rot into a required step. Then run
+  `python3 -m unittest discover -s tests -t .` (or push, and let `.github/workflows/validate.yml` run it).
+- The validator (`icm_validator/`) is **generic** — it reads the registry. You should almost never
+  need to touch it when changing a type. If you add a brand-new *check code*, add it to
+  `icm_validator/catalog.py` AND a failing-mutation test, or the coverage meta-test fails.

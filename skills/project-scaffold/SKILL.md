@@ -77,6 +77,12 @@ brief's manifest. Notes:
 ### 4b. Overlay mode (brownfield projects)
 If the brief is brownfield (step 1), you are **adding the ICM context/routing layer over an existing
 repo — never reshaping it**:
+- **Snapshot the repo FIRST — before creating any ICM file.** Write `.icm/baseline.json`, a record of
+  every pre-existing file's path + sha256 + size (plus the ICM `tool_paths` you're about to add). This
+  is what lets `icm validate` later prove the overlay modified nothing. If `python3` is present, use the
+  helper: `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/icm_baseline.py" "<repo>" {YYYY-MM-DD} > "<repo>/.icm/baseline.json"`
+  (create `.icm/` first). Write it **once**: on a re-scaffold of an already-adopted repo, do NOT
+  regenerate it — it must keep reflecting the original pre-ICM state.
 - **Do not create, move, rename, or modify any existing source.** Read the brief's "Existing
   Inventory" (discovered dirs → proposed ICM layer, per the type's §10 mapping).
 - Add only what's missing: the L0/L1 files, `.icm/`, per-workspace `CONTEXT.md` placed at the
@@ -92,10 +98,14 @@ repo — never reshaping it**:
 ### 5. Generate the files
 - **Root `CLAUDE.md`** from §6 — fill the slots; keep it map-only and under 200 lines; **do not add
   a routing table**. Keep the "Maintenance" footer that reminds the agent to offer `session-learnings`
-  at task completion — that footer is the hook-free trigger for Skill 3. **The Avoid section must never
-  be empty:** always emit the type's baseline avoids, then the brief's specific `things_to_avoid` /
-  `constraints` above them. If the brief carries no specifics, emit the baseline anyway and note that
-  the brief looks underspecified on guardrails (it usually means `project-brief` skipped a step).
+  at task completion — that footer is the hook-free trigger for Skill 3. **Emit Avoid as the type's
+  §6 template defines it — HARD constraints + SOFT defaults — and never empty.** The brief's HARD
+  `things_to_avoid` / `constraints` render under `### Hard constraints`; the secrets baseline also
+  goes there. Researched/assumed defaults and the rest of the baseline floor (scope / off-stack tech /
+  unrelated refactors) render under `### Soft defaults`, each carrying `— default, {created_date},
+  provenance: {scaffold-baseline|assumed-default}`. (This hard/soft split is the ARA §7.4 lesson: a
+  capable future session must be able to tell a real limit from a revisitable default.) If the brief
+  carries no specifics, emit the baselines anyway and note the brief looks underspecified.
 - **Root `CONTEXT.md`** from §7a — router only; **no folder map or naming**.
 - **Each workspace/stage `CONTEXT.md`** from §7b onward — fill from the brief.
 - **Seed L3 reference** — if the brief lists reference material, drop it into the appropriate L3
@@ -109,10 +119,17 @@ repo — never reshaping it**:
   origin: {greenfield|brownfield}
   created: {YYYY-MM-DD}
   ```
-  For **brownfield** projects, also record a `workspace → existing-dir` map (one line per workspace,
-  pointing at the real directory it covers) so `session-learnings` routes learnings to the project's
-  actual folders. This is how `session-learnings` later identifies the project, its type, and its
-  layout. If the registry file has no `version`, record `registry_version: unknown` and note it.
+  For **brownfield** projects, append a `workspace_map:` block — one indented `workspace: dir1, dir2`
+  line per workspace, pointing at the real existing directories it covers — so both `icm validate`
+  (overlay invariants) and `session-learnings` route to the project's actual folders:
+  ```
+  workspace_map:
+    src: src/app, src/lib
+    ops: Dockerfile
+    planning: docs/architecture
+  ```
+  This is also how `session-learnings` later identifies the project, its type, and its layout. If the
+  registry file has no `version`, record `registry_version: unknown` and note it.
 - **`.icm/LEARNINGS-INBOX.md`** — create empty with a one-line header.
 - **`.icm/README.md`** — one line: "This folder marks an ICM-managed project. See manifest.md."
 
@@ -122,10 +139,31 @@ overlays, report **what was added vs. what was left untouched** so it's clear no
 Do **not** build any application code — that's out of scope; you're building the structure that makes
 building easier.
 
+### 7. Validate the scaffold (generate → validate → fix)
+Before declaring success, run the bundled validator and fix what it flags:
+```
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/icm" validate project "<project-dir>" --json
+```
+Branch on the exit code:
+- **0** — clean. **2** — warnings only: surface them, but it passes.
+- **1** — one or more **errors**: read the findings (each carries a `code` + `file`:`line`), fix the
+  named files, and **re-run**. Repeat at most **3 rounds**, then stop and show the user any remaining
+  findings rather than looping forever.
+- **3** — `python3` is unavailable: fall back to `${CLAUDE_PLUGIN_ROOT}/scripts/PROSE-FALLBACK-CHECKLIST.md`
+  and self-verify against it (note: the prose path cannot re-hash files, so the brownfield no-touch
+  guarantee is weaker — recommend installing `python3` for brownfield).
+- **4** — a registry/parse problem (a bug in the type file, not this project): stop and tell the user; don't retry.
+
+The checks are mechanical — unfilled `{slots}`, the L0/L1 split (no routing table in `CLAUDE.md`),
+every router target resolves, every required field's value actually landed in the tree, the manifest
+is well-formed, and (brownfield) **no pre-existing file was modified**. Passing them is what turns a
+structurally-complete scaffold into a *verified* one.
+
 ## Idempotency
 If part of the tree already exists, don't clobber it. Compare against the template and **ask before
 overwriting** any file that already has content. **Never overwrite L4 working directories** (`src/`,
-`specs/`, generated docs) — those hold real work.
+`specs/`, generated docs) — those hold real work. **Never regenerate `.icm/baseline.json`** on a
+re-scaffold — it is the record of what predated ICM, and rewriting it would hide a later violation.
 
 ## What NOT to do
 - Don't put routing tables in `CLAUDE.md`, or folder maps in the root `CONTEXT.md` — the split is
