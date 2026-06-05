@@ -1,6 +1,6 @@
 ---
 type: coding
-version: 4
+version: 5
 shape: workspace
 status: complete
 match_signals:
@@ -148,11 +148,15 @@ Layer annotations in parentheses. `{app_name}` and other `{slots}` are filled fr
 > `npm install`; a Next.js frontend → start locally = `npm run dev`). If a command is genuinely
 > unknowable from the brief (often the test command, sometimes deploy), write `TBD` and keep the
 > row — don't delete it; the row tells future sessions the command still needs filling in.
-> **The Avoid section must never be empty:** always emit the baseline avoids in the template below,
-> then add the brief's specific `things_to_avoid` / `constraints` above them. **De-dupe:** the
-> baselines are a generic floor (scope / off-stack tech / unrelated refactors / secrets) — if a
-> brief-specific avoid already says the same thing, keep only the specific one. If the brief carries
-> no specifics at all, emit just the baseline AND note the brief looks underspecified on guardrails.
+> **Avoid has two parts and must never be empty.** Emit it as **HARD constraints** (real user
+> guardrails — never cross) and **SOFT defaults** (researched/assumed defaults, revisitable as the
+> project matures; each carries a date + provenance so a capable future session can tell a real limit
+> from a default it may revisit — the ARA §7.4 "don't over-constrain a capable agent" lesson). The
+> brief's HARD `things_to_avoid` / `constraints` render under Hard (plus the secrets baseline);
+> researched/assumed defaults and the rest of the baseline floor (scope / off-stack tech / unrelated
+> refactors) render under Soft. **De-dupe:** if a brief-specific avoid already covers a baseline, keep
+> only the specific one. If the brief carries no specifics at all, emit just the baselines AND note the
+> brief looks underspecified on guardrails.
 
 ```markdown
 # {app_name} — Project Map
@@ -181,15 +185,20 @@ Built for: {users}. Platform: {platform}.
 | Deploy | {deploy_cmd_or_TBD} |
 
 ## Avoid
-<!-- Brief-specific avoids first, then the baseline floor below. NEVER leave this empty.
-     De-dupe: if a brief-specific avoid already covers a baseline, keep only the specific one. -->
-{each thing_to_avoid as a bullet}
-{each constraint expressed as an avoid}
-- Stay within the agreed launch scope; don't add features beyond the current `planning/specs/` without writing a spec first.
-- Don't introduce tech or services outside the chosen stack ({frontend_stack} / {backend_stack} / {data_store}) without recording an ADR in `planning/decisions/`.
-- Don't refactor or modify areas unrelated to the current task — keep changes scoped.
+<!-- HARD = user guardrails (never cross). SOFT = researched/assumed defaults, revisitable as the
+     project matures — each carries a date + provenance. NEVER leave Avoid empty. De-dupe: if a
+     brief-specific avoid already covers a baseline, keep only the specific one. -->
+
+### Hard constraints (never cross)
+{each HARD thing_to_avoid / constraint from the brief as a bullet}
 - Don't hard-code secrets or keys — use the host's secret store ({hosting}).
-<!-- session-learnings appends earned anti-patterns below this line -->
+
+### Soft defaults (revisit as the project matures)
+{each SOFT thing_to_avoid from the brief as a bullet — default, {created_date}, provenance: assumed-default}
+- Stay within the agreed launch scope; don't add features beyond the current `planning/specs/` without writing a spec first. — default, {created_date}, provenance: scaffold-baseline
+- Don't introduce tech or services outside the chosen stack ({frontend_stack} / {backend_stack} / {data_store}) without recording an ADR in `planning/decisions/`. — default, {created_date}, provenance: scaffold-baseline
+- Don't refactor or modify areas unrelated to the current task — keep changes scoped. — default, {created_date}, provenance: scaffold-baseline
+<!-- session-learnings appends earned anti-patterns below this line, as Soft defaults -->
 
 ## Current State
 - Project scaffolded {created_date}. Nothing built yet.
@@ -400,7 +409,7 @@ factory**? Keep it. Else (purely L4 / one-off) **DISCARD** it. Then route surviv
 | Category | Recurrence test (keep if YES) | Destination file → section | Insert format |
 |----------|-------------------------------|----------------------------|---------------|
 | new-convention | Will this pattern recur in future code? | `src/CONTEXT.md` → "Patterns We Follow" | `- {pattern}: {one-line why}` |
-| thing-to-avoid | Will this mistake / anti-pattern recur? | `CLAUDE.md` → "Avoid" | `- {avoid X} — {short reason}` |
+| thing-to-avoid | Will this mistake / anti-pattern recur? | `CLAUDE.md` → "Avoid" → **Soft defaults** (never Hard — that's user-authored) | `- {avoid X} — {short reason} ({date}, provenance: learned)` |
 | current-state-update | Persistent state change (not transient)? | `CLAUDE.md` → "Current State" | `- {what changed} ({date})` |
 | decision | A real, lasting technical decision? | new `planning/decisions/YYYY-MM-DD_{title}.md` | ADR (Context / Decision / Consequences) |
 | command | Reusable project command **not already in the Commands table**? | `CLAUDE.md` → "Commands" table | table row: `\| {do this} \| {cmd} \|` |

@@ -61,6 +61,12 @@ and brief signals. It writes nothing.
   "don't modify the existing deploy workflow / Dockerfile", "don't break the public API in `src/…`",
   "don't touch the legacy `{module}`", plus the usual scope/stack/secrets ones. Don't leave Avoid empty.
 
+### 5.5. Coverage re-read pass
+Re-scan **both** the repo-analyzer output **and** the conversation for facts that aren't yet captured —
+a CLI/entrypoint mentioned in the README, a deploy quirk, a "do not touch" the user said in passing,
+an existing ADR worth seeding. Map each to a field, an Avoid (HARD if it protects something that
+works), or the Existing Inventory before validating. Brownfield loses context most easily here.
+
 ### 6. Validation pass
 Check every `required: yes` field is filled (inferred or answered). If a required field is still
 `UNKNOWN`, ask or research it before writing. This is the same zero-missing-context contract
@@ -82,12 +88,14 @@ Same format as `project-brief`, plus an **Existing Inventory** section and `orig
 - Platform: {platform}
 
 ## Structure Manifest
-<!-- one entry per answered/inferred §3 field, by id -->
-- {id}: {answer}
+<!-- one entry per answered/inferred §3 field, by id, tagged with provenance:
+     [user] | [user-confirmed-default] | [inferred-from-repo] -->
+- {id}: {answer}  [{provenance}]
 - ...
 
 ## Existing Inventory
-<!-- from repo-analyzer; the proposed mapping project-scaffold will overlay. Flag for confirmation. -->
+<!-- from repo-analyzer; the proposed mapping project-scaffold will overlay. Flag for confirmation.
+     This table IS the source for the manifest's `workspace_map:` (workspace -> existing dirs). -->
 | Existing path | Maps to (ICM workspace / layer) | Notes |
 |---------------|----------------------------------|-------|
 | `src/` | src/ (L4 app code) | entry: src/index.ts |
@@ -97,7 +105,11 @@ Same format as `project-brief`, plus an **Existing Inventory** section and `orig
 - Directories left as-is (no workspace): {list}
 
 ## Things to Avoid
-- {constraints and things_to_avoid}
+### Hard (never cross)
+- {brownfield guardrails that protect what works: "don't modify the Dockerfile/deploy workflow",
+  "don't break the public API in `src/…`", "don't touch the legacy `{module}`", + secrets}
+### Soft (revisitable defaults)
+- {researched/assumed defaults the user didn't hard-require}
 
 ## Reference Material to Seed (L3)
 - {existing ADRs/specs/architecture docs worth seeding; "none" if nothing}
@@ -107,6 +119,10 @@ Same format as `project-brief`, plus an **Existing Inventory** section and `orig
 - Inferred from repo: {ids, each with the file evidence}
 - Researched: {ids, with one-line rationale} (usually none for brownfield)
 ```
+
+The **Existing Inventory** "Maps to" column is what `project-scaffold` turns into the manifest's
+`workspace_map:` block, which `icm validate` uses to prove the overlay points only at real existing
+dirs and touched no source file.
 
 ### 8. Offer the next step
 Tell the user the brief is written, and offer: *"Want me to overlay the ICM structure now (no files

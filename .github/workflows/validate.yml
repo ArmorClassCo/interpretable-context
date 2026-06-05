@@ -1,0 +1,57 @@
+name: Validate ICM
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  skills-frontmatter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Every SKILL.md has name + description
+        run: |
+          errors=0
+          for f in skills/*/SKILL.md; do
+            [ -f "$f" ] || { echo "ERROR missing $f"; errors=$((errors+1)); continue; }
+            head -40 "$f" | grep -q "^name:" || { echo "ERROR no name: in $f"; errors=$((errors+1)); }
+            head -40 "$f" | grep -q "^description:" || { echo "ERROR no description: in $f"; errors=$((errors+1)); }
+          done
+          if [ "$errors" -ne 0 ]; then echo "FAILED ($errors)"; exit 1; fi
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - run: python3 --version
+      - name: Run the validator test suite (stdlib unittest, no pip)
+        run: python3 -m unittest discover -s tests -t . -v
+
+  registry-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Lint the complete type strictly
+        run: bash scripts/icm lint --type coding --strict
+      - name: Lint the whole bundled registry (stubs pass leniently)
+        run: bash scripts/icm lint
+
+  validate-fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Greenfield golden tree must pass
+        run: bash scripts/icm validate project tests/fixtures/greenfield/expected-tree
+      - name: Brownfield golden overlay must pass (proves no source file touched)
+        run: bash scripts/icm validate project tests/fixtures/brownfield/expected-overlay

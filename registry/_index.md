@@ -60,13 +60,13 @@ Every type file MUST contain these sections, in this order:
 | FM | Frontmatter | all | `type` (kebab-case, == filename stem), `version` (integer, bump on any change), `shape` (`workspace` \| `pipeline`), `match_signals` (list), `status` (`complete` \| `stub`) |
 | 1 | Identity | project-brief | What this type is; when to use it (plain language) |
 | 2 | Match signals | project-brief | Strong signals + weak/ambiguous ones (confirm-don't-assume) for the classifier |
-| 3 | Brief question set | project-brief | Markdown table, columns: `id`, `prompt` (plain language), `source` (`user-only` \| `researchable`), `required` (yes/no), `maps_to` (target structure slot/file). **The `required: yes` rows ARE the validation contract for BOTH project-brief (final check) and project-scaffold (re-check).** |
+| 3 | Brief question set | project-brief | Markdown table, columns: `id`, `prompt` (plain language), `source` (`user-only` \| `researchable`), `required` (yes/no), `maps_to` (target structure slot/file). **The `required: yes` rows ARE the validation contract for BOTH project-brief (final check) and project-scaffold (re-check) — now also machine-checked by `icm validate` (the `maps_to` binding) and `icm lint`.** |
 | 4 | Folder tree | project-scaffold, session-learnings | Exact tree to create, layer-annotated, with `{slots}` filled from the brief |
 | 5 | Layer map | project-scaffold, session-learnings | Table mapping every path to L0/L1/L2/L3/L4 |
-| 6 | CLAUDE.md template (L0) | project-scaffold | Map-only template with `{slots}`; keep < 200 lines; **NO routing table**. Its **Avoid** section must define type-baseline guardrails so it is **never empty** — Avoid bounds the agent's scope/direction, so an empty one means the brief is underspecified (see "Avoid is a guardrail" below). |
+| 6 | CLAUDE.md template (L0) | project-scaffold | Map-only template with `{slots}`; keep < 200 lines; **NO routing table**. Its **Avoid** section must be authored as **`### Hard constraints`** (user guardrails, incl. the secrets baseline) + **`### Soft defaults`** (researched/assumed defaults & the scope/off-stack/refactor baselines — each carrying a date + provenance, revisitable: ARA §7.4), and is **never empty** (see "Avoid is a guardrail" below). |
 | 7 | CONTEXT.md templates | project-scaffold | Root router (L1, **NO folder map**) + one per workspace/stage (L2): What-this-is / What-to-load (Load + Skip) / Folder / Process / Skills & Tools / What-NOT-to-do |
 | 8 | Naming conventions | project-scaffold, session-learnings | File-naming patterns table |
-| 9 | Learning-routing rules | session-learnings | Table: category → recurrence test → destination file+section → insert format; plus an explicit **DISCARD** row for one-offs |
+| 9 | Learning-routing rules | session-learnings | Table: category → recurrence test → destination file+section → insert format; plus an explicit **DISCARD** row for one-offs. A `thing-to-avoid` routes to `CLAUDE.md` → Avoid → **Soft defaults** (never Hard), with date + `provenance: learned`. |
 | 10 | Existing-repo mapping (brownfield) | adopt-project, project-scaffold (overlay) | How to recognize an existing repo's parts and map them onto this type's ICM layers **without moving files**: which files reveal the researchable fields, and which existing dirs map to which workspace/layer |
 
 ### Avoid is a guardrail, not paperwork (applies to every type)
@@ -76,6 +76,24 @@ small set of **baseline avoids** (scope, off-stack tech, secrets, unrelated refa
 render, and `project-brief` / `adopt-project` **propose project-specific avoids/constraints the
 baselines don't already cover** when the user names none (de-dupe overlaps — keep the specific one).
 Treat an empty Avoid as a sign the brief missed something — dig, don't pass.
+
+### Validation & provenance (`icm lint` / `icm validate`)
+The structure is **machine-checked** — and mechanically, not by LLM judgment (ARA found mechanical
+checks catch ~100% of injected defects vs ~22% for an LLM-judged check):
+- **`icm lint`** validates each type file against this FORMAT SPEC (`status: complete` strictly,
+  `status: stub` leniently — a stub passes, its TODO sections are reported as info). Run it after
+  editing a type: `bash "${CLAUDE_PLUGIN_ROOT}/scripts/icm" lint --type <type> --strict`.
+- **`icm validate project <dir>`** validates a scaffolded/overlaid project: no unfilled `{slots}`,
+  the L0/L1 split, every router target resolves, every required field's value landed (the `maps_to`
+  binding), the manifest is well-formed, and — brownfield — that **no pre-existing file was modified**
+  (re-hashing `.icm/baseline.json`). `project-scaffold` runs it in a generate→validate→fix loop.
+
+Both are **registry-driven** — they parse the type file and never hardcode a type — so completing a
+stub or adding a type needs **no validator change** (the same property as "No skill code changes" below).
+
+**Provenance vocabulary** (used by the brief's Structure Manifest and the Avoid Hard/Soft split):
+`user` · `user-confirmed-default` · `assumed-default` · `inferred-from-repo` (brownfield) · `learned`
+(session-learnings) · `scaffold-baseline` (a §6 template baseline avoid).
 
 ### The layer split (do not violate)
 - **`CLAUDE.md` (L0) = THE MAP.** Always loaded → every line costs tokens in every conversation.

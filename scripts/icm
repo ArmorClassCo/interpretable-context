@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Thin shim so the skills can call the validator with a short Bash one-liner:
+#   bash "${CLAUDE_PLUGIN_ROOT}/scripts/icm" validate project "<dir>" --json
+#
+# Probes python3 (then python) and runs the bundled icm_validator package. Exits 3
+# ("usage / tooling unavailable") if no Python is found, which the skills treat as the
+# signal to fall back to the prose checklist.
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+if command -v python3 >/dev/null 2>&1; then
+  PY=python3
+elif command -v python >/dev/null 2>&1; then
+  PY=python
+else
+  echo "icm: python3 not found — fall back to the prose checklist" >&2
+  exit 3
+fi
+
+exec env PYTHONPATH="${ROOT}${PYTHONPATH:+:$PYTHONPATH}" "$PY" -m icm_validator "$@"

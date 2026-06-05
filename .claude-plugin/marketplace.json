@@ -7,8 +7,8 @@
   "plugins": [
     {
       "name": "interpretable-context",
-      "description": "Set up and maintain AI-built projects with Interpretable Context Methodology (ICM): plan a brief, scaffold the ICM structure, adopt an existing repo, and capture recurring learnings.",
-      "version": "1.1.1",
+      "description": "Set up and maintain AI-built projects with Interpretable Context Methodology (ICM): plan a brief, scaffold the ICM structure, adopt an existing repo, validate it mechanically, and capture recurring learnings.",
+      "version": "1.2.0",
       "source": "./",
       "author": {
         "name": "boels"
