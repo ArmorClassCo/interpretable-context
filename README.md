@@ -61,6 +61,12 @@ Then **restart Claude Code / open a new session** to activate it. Run `/icm` for
 
 Keeping the map (L0) and router (L1) separate keeps the always-loaded context tiny.
 
+Routing doesn't stop at folders — the L2 contracts also route to **capabilities**: each type ships
+a curated **Skills & Tools** baseline (the scaffold prompts you to install anything missing, with
+links; override via `~/.claude/icm/registry/`), and diagnostic workspaces carry a **Known Gotchas**
+section (symptom → likely cause → fix) that `session-learnings` keeps feeding — so debugging-style
+tasks check accumulated project knowledge before reasoning from scratch.
+
 ## Validation (QA on the scaffold)
 
 A scaffold is only useful if it's *correct*. `project-scaffold` runs a **mechanical validator** in a

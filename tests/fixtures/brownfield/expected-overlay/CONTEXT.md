@@ -7,6 +7,7 @@ CLAUDE.md (always loaded) has the folder map and naming. This file routes you to
 |-----------|---------|------------------|
 | Plan a feature / write a spec | `planning/CONTEXT.md` | the goal + key features |
 | Write or change app code | `src/CONTEXT.md` | the relevant existing module |
+| Fix a bug / debug a failure | `src/CONTEXT.md` | its **Known Gotchas** + the debugging skill it names |
 | Write user/developer docs | `docs/CONTEXT.md` | the feature it documents |
 | Deploy / configure infra | `ops/CONTEXT.md` | hosting = Docker (self-hosted) |
 

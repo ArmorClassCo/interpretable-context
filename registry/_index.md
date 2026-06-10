@@ -64,9 +64,9 @@ Every type file MUST contain these sections, in this order:
 | 4 | Folder tree | project-scaffold, session-learnings | Exact tree to create, layer-annotated, with `{slots}` filled from the brief |
 | 5 | Layer map | project-scaffold, session-learnings | Table mapping every path to L0/L1/L2/L3/L4 |
 | 6 | CLAUDE.md template (L0) | project-scaffold | Map-only template with `{slots}`; keep < 200 lines; **NO routing table**. Its **Avoid** section must be authored as **`### Hard constraints`** (user guardrails, incl. the secrets baseline) + **`### Soft defaults`** (researched/assumed defaults & the scope/off-stack/refactor baselines — each carrying a date + provenance, revisitable: ARA §7.4), and is **never empty** (see "Avoid is a guardrail" below). |
-| 7 | CONTEXT.md templates | project-scaffold | Root router (L1, **NO folder map**) + one per workspace/stage (L2): What-this-is / What-to-load (Load + Skip) / Folder / Process / Skills & Tools / What-NOT-to-do |
+| 7 | CONTEXT.md templates | project-scaffold | Root router (L1, **NO folder map**) + one per workspace/stage (L2): What-this-is / What-to-load (Load + Skip) / Folder / Process / Skills & Tools / What-NOT-to-do. **Skills & Tools carries the type's recommended-skill baseline** (emit even if not installed — the scaffold prompts with install links; see "Route tasks to capabilities" below) plus one row per brief `known_tools` entry. Workspaces with recurring diagnostic work also carry a **Known Gotchas** section (symptom → likely cause → fix/check) that §9 routes `gotcha` learnings into. |
 | 8 | Naming conventions | project-scaffold, session-learnings | File-naming patterns table |
-| 9 | Learning-routing rules | session-learnings | Table: category → recurrence test → destination file+section → insert format; plus an explicit **DISCARD** row for one-offs. A `thing-to-avoid` routes to `CLAUDE.md` → Avoid → **Soft defaults** (never Hard), with date + `provenance: learned`. |
+| 9 | Learning-routing rules | session-learnings | Table: category → recurrence test → destination file+section → insert format; plus an explicit **DISCARD** row for one-offs. A `thing-to-avoid` routes to `CLAUDE.md` → Avoid → **Soft defaults** (never Hard), with date + `provenance: learned`. A `gotcha` routes to the nearest workspace's **Known Gotchas** section as `symptom → likely cause → fix/check`. |
 | 10 | Existing-repo mapping (brownfield) | adopt-project, project-scaffold (overlay) | How to recognize an existing repo's parts and map them onto this type's ICM layers **without moving files**: which files reveal the researchable fields, and which existing dirs map to which workspace/layer |
 
 ### Avoid is a guardrail, not paperwork (applies to every type)
@@ -76,6 +76,22 @@ small set of **baseline avoids** (scope, off-stack tech, secrets, unrelated refa
 render, and `project-brief` / `adopt-project` **propose project-specific avoids/constraints the
 baselines don't already cover** when the user names none (de-dupe overlaps — keep the specific one).
 Treat an empty Avoid as a sign the brief missed something — dig, don't pass.
+
+### Route tasks to capabilities, not just folders (applies to every type)
+A router that stops at *task → workspace* leaves the agent to rediscover HOW to do the work every
+session. So the L2 contracts also route to **capabilities**:
+- **Skills & Tools is a curated baseline per type** — the skills a session should reach for in that
+  workspace, emitted **even when not currently installed**. The scaffold checks availability after
+  generating and prompts the user to install what's missing (install links live in the type file's
+  §7 table footnotes and survive into the generated files). The baseline is non-negotiable by
+  default but registry-owned: override the type file in `~/.claude/icm/registry/` to change it.
+  Brief `known_tools` entries each add a row to the most relevant workspace's table.
+- **Known Gotchas is per-workspace diagnostic memory** (`symptom → likely cause → fix/check`).
+  Any workspace with recurring diagnostic work gets one; the router and What-to-Load rows for
+  diagnostic tasks point at it FIRST, before reasoning from scratch, and §9 routes `gotcha`
+  learnings into it so it compounds. Debugging code is the `coding` instance; the same pattern
+  applies to any type's diagnosis-shaped work (a client's recurring objections, a content format
+  that keeps underperforming, a deploy that fails the same way).
 
 ### Validation & provenance (`icm lint` / `icm validate`)
 The structure is **machine-checked** — and mechanically, not by LLM judgment (ARA found mechanical

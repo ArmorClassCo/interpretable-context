@@ -1,6 +1,6 @@
 ---
 type: coding
-version: 5
+version: 6
 shape: workspace
 status: complete
 match_signals:
@@ -64,7 +64,7 @@ and project-scaffold (re-validation) check.
 | `users` | "Who will use it, and what's the main thing they'll do?" | user-only | yes | CLAUDE.md → What This Is; planning scope |
 | `platform` | "Is this a website, a mobile app, or something else?" | user-only | yes | tech choices; src/CONTEXT.md; CLAUDE.md Commands |
 | `key_features` | "List the 3–5 most important things it must do at launch." | user-only | yes | planning/specs seeds; Structure Manifest |
-| `known_tools` | "Are there any tools, services, or systems you already know you want to use? (a database, Stripe, a framework, an existing account, etc.)" | user-only | no | planning/architecture; CLAUDE.md → Avoid (as fixed choices); **constrains the researchable fields below** |
+| `known_tools` | "Are there any tools, services, or systems you already know you want to use? (a database, Stripe, a framework, an existing account, etc.)" | user-only | no | planning/architecture; CLAUDE.md → Avoid (as fixed choices); a "Skills & Tools" row in the most relevant workspace CONTEXT.md; **constrains the researchable fields below** |
 | `frontend_stack` | "What to build the screens with." | researchable | yes | src/CONTEXT.md Patterns; CLAUDE.md Commands; planning/architecture |
 | `backend_stack` | "Where the data and logic live (server / database / login)." | researchable | yes | src/CONTEXT.md; planning/architecture; CLAUDE.md Commands |
 | `data_store` | "Where the app's data is saved." | researchable | yes | planning/architecture; ops/CONTEXT.md |
@@ -214,6 +214,20 @@ capture any reusable learnings into this project's context files.
 
 ## 7. CONTEXT.md templates  (consumed by: project-scaffold)
 
+> **Skills & Tools is a curated baseline, not an inventory of what happens to be installed.** The
+> skills these templates name are this type's recommended defaults — **emit the rows even when a
+> skill isn't currently installed**. After generating, `project-scaffold` checks availability and
+> prompts the user to install anything missing (the install links ship in the table footnotes, so
+> they survive into the generated files). To change the baseline, override this file via
+> `~/.claude/icm/registry/coding.md`. Also render **one extra row per brief `known_tools` entry**
+> in the most relevant workspace's table (a payments service → `src/`; a deploy/infra tool →
+> `ops/`), naming its MCP server or CLI when one exists.
+>
+> **Known Gotchas is the workspace's diagnostic memory** — `symptom → likely cause → fix/check`.
+> Diagnostic tasks (fixing a bug, investigating an incident) load it BEFORE reasoning from
+> scratch, and session-learnings appends to it over time (§9 `gotcha`). It ships in `src/` and
+> `ops/` — the workspaces with recurring diagnostic work.
+
 ### 7a. Root CONTEXT.md (L1) — THE ROUTER
 
 > Router only. Task → workspace table, workspace summary, cross-workspace flow. ~30–50 lines.
@@ -229,6 +243,7 @@ CLAUDE.md (always loaded) has the folder map and naming. This file routes you to
 |-----------|---------|------------------|
 | Plan a feature / write a spec | `planning/CONTEXT.md` | the goal + key features |
 | Write or change app code | `src/CONTEXT.md` | the relevant spec from `planning/specs/` |
+| Fix a bug / debug a failure | `src/CONTEXT.md` | its **Known Gotchas** + the debugging skill it names |
 | Record an architecture decision | `planning/CONTEXT.md` | — |
 | Write user/developer docs | `docs/CONTEXT.md` | the feature it documents |
 | Deploy / configure infra / scripts | `ops/CONTEXT.md` | hosting = {hosting} |
@@ -284,6 +299,8 @@ planning/
 | Web research | While speccing, to check current best practice | Validate an approach is still recommended |
 | `superpowers:writing-plans` | Turning a spec into an executable plan | Structured implementation planning |
 
+> Baseline skills for this project type. If one isn't installed, install it: superpowers → https://github.com/obra/superpowers
+
 ## What NOT to Do
 - Don't put implementation code here — that's `src/`.
 - Don't let a spec dictate line-by-line implementation; leave the builder room.
@@ -301,7 +318,7 @@ The application code. Frontend: {frontend_stack}. Backend: {backend_stack}. Data
 | Task | Load These | Skip These |
 |------|-----------|------------|
 | Implement a feature | the spec from `../planning/specs/`, this file's "Patterns" | `docs/`, `ops/` |
-| Fix a bug | the failing area; relevant architecture note | unrelated specs |
+| Fix a bug | this file's **Known Gotchas** first; then the failing area; relevant architecture note | unrelated specs |
 | Refactor | "Patterns We Follow"; affected files | `docs/` |
 
 ## Folder Structure
@@ -311,14 +328,23 @@ src/   ← application code; structure follows {frontend_stack}/{backend_stack} 
 
 ## Patterns We Follow
 - Build to the spec's acceptance criteria; verify before calling a feature done.
+- A repeated, deterministic step becomes a script in `../ops/scripts/` + a CLAUDE.md Commands row — from then on code does it, not judgment.
 <!-- session-learnings appends recurring conventions below this line -->
+
+## Known Gotchas
+<!-- Diagnostic memory: symptom → likely cause → fix/check. Check BEFORE debugging from scratch.
+     session-learnings appends recurring gotchas below this line -->
+- None recorded yet.
 
 ## Skills & Tools
 | Skill / Tool | When | Purpose |
 |--------------|------|---------|
 | `superpowers:test-driven-development` | Before writing feature code | Tests first |
-| `superpowers:systematic-debugging` | On any bug or unexpected behavior | Root-cause before fixing |
+| `superpowers:systematic-debugging` | On any bug or unexpected behavior | Root-cause before fixing — after checking **Known Gotchas** above |
 | Context7 MCP | Need current library docs mid-build | Fetch accurate API usage |
+{plus one row per src-relevant known_tools entry from the brief — the tool, when to reach for it, purpose}
+
+> Baseline skills for this project type. If one isn't installed, install it: superpowers → https://github.com/obra/superpowers · Context7 MCP → https://github.com/upstash/context7
 
 ## What NOT to Do
 - Don't add a dependency or service that contradicts the chosen stack or the brief's constraints{constraints_inline_if_any}.
@@ -372,7 +398,7 @@ here; per-run output (L4) does too.
 |------|-----------|------------|
 | Deploy | `deploy/` config; CLAUDE.md Commands | `planning/specs/`, `docs/guides` |
 | Add a reusable script | existing `scripts/` for conventions | `src/` internals |
-| Investigate an incident | `monitoring/`; relevant architecture note | docs |
+| Investigate an incident | this file's **Known Gotchas** first; `monitoring/`; relevant architecture note | docs |
 
 ## Folder Structure
 \```
@@ -385,6 +411,19 @@ ops/
 ## The Process
 - Reusable operational steps become a script in `scripts/`, then a row in CLAUDE.md Commands.
 - One-off run output stays in `monitoring/` and is not promoted.
+
+## Known Gotchas
+<!-- Diagnostic memory for deploy & infra quirks: symptom → likely cause → fix/check.
+     session-learnings appends recurring gotchas below this line -->
+- None recorded yet.
+
+## Skills & Tools
+| Skill / Tool | When | Purpose |
+|--------------|------|---------|
+| Context7 MCP | Configuring {hosting} or any infra service | Current docs for the hosting platform / CLI |
+{plus one row per ops-relevant known_tools entry from the brief — the tool, when to reach for it, purpose}
+
+> Baseline tools for this project type. If Context7 MCP isn't installed, install it: https://github.com/upstash/context7
 
 ## What NOT to Do
 - Don't hardcode secrets in `deploy/` — reference the host's secret store ({hosting}).
@@ -413,7 +452,7 @@ factory**? Keep it. Else (purely L4 / one-off) **DISCARD** it. Then route surviv
 | current-state-update | Persistent state change (not transient)? | `CLAUDE.md` → "Current State" | `- {what changed} ({date})` |
 | decision | A real, lasting technical decision? | new `planning/decisions/YYYY-MM-DD_{title}.md` | ADR (Context / Decision / Consequences) |
 | command | Reusable project command **not already in the Commands table**? | `CLAUDE.md` → "Commands" table | table row: `\| {do this} \| {cmd} \|` |
-| gotcha | Integration quirk that will bite again? | nearest relevant `*/CONTEXT.md` "What NOT to Do" (or CLAUDE.md if cross-cutting) | `- {gotcha} — {how to avoid}` |
+| gotcha | Integration quirk that will bite again? | nearest relevant `*/CONTEXT.md` → "Known Gotchas" (create the section if absent; remove a "None recorded yet." placeholder on first insert; CLAUDE.md → Avoid → Soft if cross-cutting) | `- {symptom} → {likely cause} → {fix or what to check} ({date})` |
 | dependency-stale | A dependency / version fact that recurs? | `CLAUDE.md` → "Current State" or `src/CONTEXT.md` Patterns | `- {dep} pinned/updated to {ver} ({date}) — {why}` |
 | (one-off) | Fails the recurrence test (only this run) | — | **DISCARD** (do not stage) |
 

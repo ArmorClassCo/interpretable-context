@@ -1,6 +1,6 @@
 {
   "name": "interpretable-context",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Set up and maintain AI-built projects with Interpretable Context Methodology (ICM) — folder structure as agent architecture. Plan a brief, scaffold the ICM structure, adopt an existing repo, validate it with a mechanical checker, and capture recurring learnings into the project's own context files.",
   "author": {
     "name": "boels"

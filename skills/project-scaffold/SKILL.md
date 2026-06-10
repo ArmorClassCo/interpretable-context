@@ -107,7 +107,16 @@ repo — never reshaping it**:
   capable future session must be able to tell a real limit from a revisitable default.) If the brief
   carries no specifics, emit the baselines anyway and note the brief looks underspecified.
 - **Root `CONTEXT.md`** from §7a — router only; **no folder map or naming**.
-- **Each workspace/stage `CONTEXT.md`** from §7b onward — fill from the brief.
+- **Each workspace/stage `CONTEXT.md`** from §7b onward — fill from the brief. Two rules for the
+  capability sections:
+  - **Skills & Tools is the type's curated baseline — emit every baseline row even if a skill
+    isn't installed in this session** (the install-link footnote ships with the table, so any
+    future session can fix that). Do NOT silently drop or swap baseline rows; the registry owns
+    the baseline. Resolve the `{plus one row per … known_tools …}` instruction: each brief
+    `known_tools` entry gets a row in the most relevant workspace's table (naming its MCP/CLI if
+    one exists); if there are none, just remove the instruction line.
+  - **Known Gotchas** starts as the template ships it ("None recorded yet.") — it is
+    session-learnings' append target, not something to pre-fill at scaffold time.
 - **Seed L3 reference** — if the brief lists reference material, drop it into the appropriate L3
   location (e.g. `planning/architecture/`).
 - **`.icm/manifest.md`**:
@@ -138,6 +147,14 @@ Show the created tree and suggest next steps (start planning a feature, etc.). F
 overlays, report **what was added vs. what was left untouched** so it's clear no existing code moved.
 Do **not** build any application code — that's out of scope; you're building the structure that makes
 building easier.
+
+**Recommended-skills check (prompt, never block).** Compare each skill named in the generated
+Skills & Tools tables against the skills actually available in this session. For any that are
+missing, tell the user plainly — *"This structure expects `superpowers:systematic-debugging`,
+which isn't installed — install superpowers from https://github.com/obra/superpowers (the link is
+also in the generated file)"* — using the install links from the type file's §7 footnotes. The
+rows stay in the generated files either way (they become live as soon as the user installs), and
+a missing skill is never a reason to stop, re-generate, or fail validation.
 
 ### 7. Validate the scaffold (generate → validate → fix)
 Before declaring success, run the bundled validator and fix what it flags:

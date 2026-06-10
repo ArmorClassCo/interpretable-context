@@ -30,6 +30,8 @@ planning/
 | Web research | While speccing, to check current best practice | Validate an approach is still recommended |
 | `superpowers:writing-plans` | Turning a spec into an executable plan | Structured implementation planning |
 
+> Baseline skills for this project type. If one isn't installed, install it: superpowers → https://github.com/obra/superpowers
+
 ## What NOT to Do
 - Don't put implementation code here — that's `src/`.
 - Don't let a spec dictate line-by-line implementation; leave the builder room.
